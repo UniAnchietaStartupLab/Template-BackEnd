@@ -8,7 +8,7 @@ const { ValidateUser } = require("../controller/validateUser.controller.js");
 const routes = Router();
 module.exports = routes;
 
-routes.get("/listUsers", ListUsers);
-routes.get("/dataUser/:uuid", DataUser);
-routes.post("/createUser", CreateUser);
-routes.post("/validateUser", ValidateUser);
+routes.get("/listUsers", ListUsers.listUsers);
+routes.get("/dataUser/:uuid", DataUser.dataUser);
+routes.post("/createUser", CreateUser.createUser);
+routes.post("/validateUser", ValidateUser.validateUser);
