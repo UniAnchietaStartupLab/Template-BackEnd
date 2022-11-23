@@ -1,17 +1,27 @@
-const { pool } = require("../migration/index");
+const { config } = require("../migration/index");
+var sql = require("mssql");
 
-async function DataUser(req, res) {
-  const { uuid } = req.params;
-  try {
-    const { rows } = await pool.query(
-      "SELECT * FROM DTB_USERS WHERE uuid = $1",
-      [uuid]
-    );
+var DataUser = {
+  dataUser: async (req, res) => {
+    const { uuid } = req.params;
+    sql.connect(config, function (err) {
+      if (err) console.log(err);
 
-    return await res.status(200).send(rows);
-  } catch (err) {
-    return res.status(400).send(err);
-  }
-}
+      var request = new sql.Request();
+
+      request.input("uuid", sql.VarChar, uuid);
+
+      request.query(
+        "SELECT * FROM DTB_USERS WHERE uuid = @uuid",
+        function (err, { recordset }) {
+          if (err) console.log(err);
+
+          console.log(recordset);
+          return res.status(200).send(recordset);
+        }
+      );
+    });
+  },
+};
 
 module.exports = { DataUser };

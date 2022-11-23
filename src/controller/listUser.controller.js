@@ -1,12 +1,21 @@
-const { pool } = require("../migration/index");
+const { config } = require("../migration/index");
+var sql = require("mssql");
 
-async function ListUsers(req, res) {
-  try {
-    const { rows } = await pool.query("SELECT * FROM DTB_USERS");
-    return res.status(200).send(rows);
-  } catch (err) {
-    return res.status(400).send(err);
-  }
-}
+var ListUsers = {
+  listUsers: async (req, res) => {
+    sql.connect(config, function (err) {
+      if (err) console.log(err);
+
+      var request = new sql.Request();
+
+      request.query("SELECT * FROM DTB_USERS", function (err, { recordset }) {
+        if (err) console.log(err);
+
+        console.log(recordset);
+        return res.status(200).send(recordset);
+      });
+    });
+  },
+};
 
 module.exports = { ListUsers };

@@ -1,21 +1,35 @@
 const { randomUUID } = require("crypto");
-const { pool } = require("../migration/index");
+const { config } = require("../migration/index");
+var sql = require("mssql");
 
-async function CreateUser(req, res) {
-  const { usuario, email, senha, nome, tipo } = req.body;
-  const uuid = randomUUID();
+var CreateUser = {
+  createUser: async (req, res) => {
+    const { usuario, email, senha, nome, tipo } = req.body;
+    const uuid = randomUUID();
 
-  try {
-    const newSession = await pool.query(
-      "INSERT INTO DTB_USERS (uuid, nome, usuario, email, senha, tipo) VALUES($1,$2,$3,$4,$5,$6) RETURNING *",
-      [uuid, nome, usuario, email, senha, tipo]
-    );
+    sql.connect(config, function (err) {
+      if (err) console.log(err);
 
-    return await res.status(200).send(newSession.rows);
-  } catch (err) {
-    console.log(err);
-    return res.status(400).send(err);
-  }
-}
+      var request = new sql.Request();
+
+      request.input("usuario", sql.VarChar, usuario);
+      request.input("email", sql.VarChar, email);
+      request.input("senha", sql.VarChar, senha);
+      request.input("nome", sql.VarChar, nome);
+      request.input("tipo", sql.VarChar, tipo);
+      request.input("uuid", sql.VarChar, uuid);
+
+      request.query(
+        "INSERT INTO DTB_USERS (uuid, nome, usuario, email, senha, tipo) VALUES(@uuid,@nome,@usuario,@email,@senha,@tipo)",
+        function (err, { recordset }) {
+          if (err) console.log(err);
+
+          console.log(recordset);
+          return res.status(200).send(recordset);
+        }
+      );
+    });
+  },
+};
 
 module.exports = { CreateUser };
